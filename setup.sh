@@ -85,3 +85,31 @@ log "You can now run development tools from the monorepo"
 
 # Export PYTHONPATH if needed for monorepo modules
 export PYTHONPATH="${SCRIPT_DIR}:${PYTHONPATH:-}"
+
+# Add gatherdocs alias to shell configuration and current session
+setup_gatherdocs_alias() {
+    # Determine shell configuration file
+    local shell_config
+    if [ -n "$ZSH_VERSION" ]; then
+        shell_config="$HOME/.zshrc"
+    else
+        shell_config="$HOME/.bashrc"
+    fi
+    
+    # Create the alias definition
+    local alias_def="alias gatherdocs='python3 ${SCRIPT_DIR}/tooling/bootstrap/gather_docs.py'"
+    
+    # Add to config file if it doesn't exist
+    if ! grep -q "alias gatherdocs=" "$shell_config"; then
+        echo "# Developer tools monorepo aliases" >> "$shell_config"
+        echo "$alias_def" >> "$shell_config"
+        log "Added gatherdocs alias to $shell_config"
+    fi
+    
+    # Make alias available in current session
+    eval "$alias_def"
+    log "Activated gatherdocs alias in current session"
+}
+
+# Call the function after virtual environment activation
+setup_gatherdocs_alias
